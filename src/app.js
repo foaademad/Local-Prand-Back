@@ -17,8 +17,10 @@ app.use(express.json());
 
 
 
-const router = require("./routes/userRoute");
-app.use("/", router);
+const userrouter = require("./routes/userRoute");
+const categoryrouter = require("./routes/catogryRoute");
+app.use("/", userrouter);
+app.use("/categories", categoryrouter);
 
 
 
