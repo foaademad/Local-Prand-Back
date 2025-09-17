@@ -31,6 +31,21 @@ let getAllCategories = async (req, res) => {
     }   
 };
 
+let deleteCategory = async (req, res) => {
+    try{
+        const { id } = req.params;
+        const category = await Category.findByIdAndDelete(id);
+        if (!category) {
+            return res.status(404).json({ message: "Category not found." });
+        }
+        res.json({ message: "Category deleted successfully." });
+    } catch (error) {
+        res.status(400).json({ message: error.message });
+    }
 
 
-module.exports = { createCategory, getAllCategories };
+};
+
+
+
+module.exports = { createCategory, getAllCategories ,deleteCategory };
