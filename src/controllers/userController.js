@@ -5,7 +5,7 @@ const bcrypt = require('bcryptjs');
 // User registration
 let register = async (req, res) => {
     try {
-        const { name, email, password, confirmPassword, phoneNumber, country } = req.body;
+    const { name, email, password, confirmPassword, phone, address } = req.body;
 
         if (password !== confirmPassword) {
             return res.status(400).json({ message: "Passwords do not match" });
@@ -20,8 +20,8 @@ let register = async (req, res) => {
             name,
             email,
             password,
-            phoneNumber,
-            country
+            phone,
+            address
         });
 
         const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, { expiresIn: '3h' });
