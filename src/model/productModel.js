@@ -1,4 +1,4 @@
-const mangoose = require("mongoose");
+const mongoose = require("mongoose");
 
 const productSchema = new mongoose.Schema({
     name: {
@@ -41,17 +41,22 @@ const productSchema = new mongoose.Schema({
     }],
     rate: {
         type: Number,
-        default: 0,
         min: 0,
-        max: 5,
-        description: String,
-        trim: true
+        max: 5
     },
+    reviews: [
+        {
+            user: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
+            rate: { type: Number, min: 0, max: 5, required: true },
+            comment: { type: String },
+            date: { type: Date, default: Date.now }
+        }
+    ]
     
 
 
 });
 
-const Product = mongoose.model("Product", productSchema);
+const product = mongoose.model("product", productSchema);
 
-module.exports = { Product };
+module.exports = { product };
