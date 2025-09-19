@@ -1,11 +1,9 @@
 const Category = require("../model/catogryModel");
-
+const { product } = require("../model/productModel");
 // Create a new category
 let createCategory = async (req, res) => {
     try {
-        if (!req.body || typeof req.body !== 'object') {
-            return res.status(400).json({ message: "Request body is missing or invalid." });
-        }
+        
         const { name } = req.body;
         if (!name || typeof name !== 'string' || !name.trim()) {
             return res.status(400).json({ message: "Category name is required." });
@@ -25,7 +23,11 @@ let createCategory = async (req, res) => {
 let getAllCategories = async (req, res) => {
     try {
         let categories = await Category.find();
-        res.json(categories);
+        let categoriesWithProducts = await Promise.all(categories.map(async (cat) => {
+            let products = await product.find({ category: cat._id });
+            return { _id: cat._id, name: cat.name, products };
+        }));
+        res.json(categoriesWithProducts);
     } catch (error) {
         res.status(400).json({ message: error.message });
     }   
