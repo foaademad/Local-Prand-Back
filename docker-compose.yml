@@ -1,0 +1,30 @@
+
+
+version: '3.8'
+
+services:
+  app:
+    build: .
+    image: fouad113/local-prand-back:v1.0.0
+    ports:
+      - "5000:5000"
+    environment:
+      - NODE_ENV=development
+      - PORT=5000
+      - MONGO_URI=mongodb://mongo:27017/pranddb
+    depends_on:
+      - mongo
+    volumes:
+      - .:/app
+      - /app/node_modules
+
+  mongo:
+    image: mongo:7
+    restart: always
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo-data:/data/db
+
+volumes:
+  mongo-data:

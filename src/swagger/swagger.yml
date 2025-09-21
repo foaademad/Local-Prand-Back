@@ -1,0 +1,697 @@
+openapi: 3.0.0
+info:
+  title: Prand API
+  version: 1.0.0
+  description: API documentation for Prand backend e-commerce application
+servers:
+  - url: http://localhost:5000
+    description: Local server
+  - url: https://your-production-url.com
+    description: Production server
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+  schemas:
+    User:
+      type: object
+      properties:
+        _id:
+          type: string
+          example: "68cd78ab3e36257ecae7cd55"
+        name:
+          type: string
+          example: "John Doe"
+        email:
+          type: string
+          format: email
+          example: "john@example.com"
+        phone:
+          type: string
+          example: "1234567890"
+        address:
+          type: string
+          example: "123 Main St, City"
+        role:
+          type: string
+          example: "user"
+    Product:
+      type: object
+      properties:
+        _id:
+          type: string
+          example: "68ccf7753d87cf1b3c37fefc"
+        name:
+          type: string
+          example: "Summer T-Shirt"
+        description:
+          type: string
+          example: "A comfortable cotton t-shirt perfect for summer wear."
+        price:
+          type: number
+          example: 29.99
+        newPrice:
+          type: number
+          example: 24.99
+        dicountRate:
+          type: number
+          example: 15
+        size:
+          type: string
+          example: "Medium"
+        category:
+          type: string
+          example: "68cce28dd6c71de761a94912"
+        image:
+          type: array
+          items:
+            type: string
+          example: ["https://example.com/images/tshirt1.jpg"]
+        reviews:
+          type: array
+          items:
+            $ref: '#/components/schemas/Review'
+    Review:
+      type: object
+      properties:
+        user:
+          type: string
+          example: "68caf6c7f0a53d358827aacc"
+        rate:
+          type: number
+          minimum: 0
+          maximum: 5
+          example: 4.5
+        comment:
+          type: string
+          example: "Really soft and fits perfectly!"
+        date:
+          type: string
+          format: date-time
+          example: "2025-09-19T06:28:42.913Z"
+    Category:
+      type: object
+      properties:
+        _id:
+          type: string
+          example: "68cce28dd6c71de761a94912"
+        name:
+          type: string
+          example: "T-Shirts"
+        products:
+          type: array
+          items:
+            $ref: '#/components/schemas/Product'
+    CartItem:
+      type: object
+      properties:
+        productId:
+          type: string
+          example: "68ccf7753d87cf1b3c37fefc"
+        quantity:
+          type: number
+          example: 2
+        size:
+          type: string
+          example: "Medium"
+        price:
+          type: number
+          example: 29.99
+        color:
+          type: string
+          example: "Blue"
+    Cart:
+      type: object
+      properties:
+        _id:
+          type: string
+          example: "68cd78ab3e36257ecae7cd55"
+        userId:
+          type: string
+          example: "68cd78ab3e36257ecae7cd55"
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/CartItem'
+    Error:
+      type: object
+      properties:
+        message:
+          type: string
+          example: "Error message"
+
+paths:
+  # User Routes
+  /users/register:
+    post:
+      summary: Register a new user
+      tags: [Users]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [name, email, password, confirmPassword, phone, address]
+              properties:
+                name:
+                  type: string
+                  example: "John Doe"
+                email:
+                  type: string
+                  format: email
+                  example: "john@example.com"
+                password:
+                  type: string
+                  example: "password123"
+                confirmPassword:
+                  type: string
+                  example: "password123"
+                phone:
+                  type: string
+                  example: "1234567890"
+                address:
+                  type: string
+                  example: "123 Main St, City"
+      responses:
+        '201':
+          description: User registered successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "User registered successfully"
+                  user:
+                    $ref: '#/components/schemas/User'
+                  token:
+                    type: string
+                    example: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /users/login:
+    post:
+      summary: Login user
+      tags: [Users]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [email, password]
+              properties:
+                email:
+                  type: string
+                  format: email
+                  example: "john@example.com"
+                password:
+                  type: string
+                  example: "password123"
+      responses:
+        '200':
+          description: Login successful
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Login successful"
+        '401':
+          description: Invalid credentials
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: User not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /users/getAllUsers:
+    get:
+      summary: Get all users
+      tags: [Users]
+      responses:
+        '200':
+          description: List of all users
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/User'
+
+  # Category Routes
+  /categories:
+    get:
+      summary: Get all categories with their products
+      tags: [Categories]
+      responses:
+        '200':
+          description: List of categories with products
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Category'
+    post:
+      summary: Create a new category
+      tags: [Categories]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [name]
+              properties:
+                name:
+                  type: string
+                  example: "T-Shirts"
+      responses:
+        '201':
+          description: Category created successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Category created successfully"
+                  category:
+                    $ref: '#/components/schemas/Category'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /categories/{id}:
+    delete:
+      summary: Delete a category
+      tags: [Categories]
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+          example: "68cce28dd6c71de761a94912"
+      responses:
+        '200':
+          description: Category deleted successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Category deleted successfully."
+        '404':
+          description: Category not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  # Product Routes
+  /products:
+    get:
+      summary: Get all products
+      tags: [Products]
+      responses:
+        '200':
+          description: List of all products
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Product'
+    post:
+      summary: Create a new product
+      tags: [Products]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [name, description, price, size, category, image]
+              properties:
+                name:
+                  type: string
+                  example: "Summer T-Shirt"
+                description:
+                  type: string
+                  example: "A comfortable cotton t-shirt perfect for summer wear."
+                price:
+                  type: number
+                  example: 29.99
+                newPrice:
+                  type: number
+                  example: 24.99
+                dicountRate:
+                  type: number
+                  example: 15
+                size:
+                  type: string
+                  example: "Medium"
+                category:
+                  type: string
+                  example: "T-Shirts"
+                image:
+                  type: array
+                  items:
+                    type: string
+                  example: ["https://example.com/images/tshirt1.jpg"]
+      responses:
+        '201':
+          description: Product created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Product'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /products/{id}:
+    get:
+      summary: Get product by ID
+      tags: [Products]
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+          example: "68ccf7753d87cf1b3c37fefc"
+      responses:
+        '200':
+          description: Product details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Product'
+        '404':
+          description: Product not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+    put:
+      summary: Update product
+      tags: [Products]
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+          example: "68ccf7753d87cf1b3c37fefc"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                  example: "Updated T-Shirt"
+                description:
+                  type: string
+                  example: "Updated description"
+                price:
+                  type: number
+                  example: 35.99
+                category:
+                  type: string
+                  example: "T-Shirts"
+      responses:
+        '200':
+          description: Product updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Product'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+    delete:
+      summary: Delete product
+      tags: [Products]
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+          example: "68ccf7753d87cf1b3c37fefc"
+      responses:
+        '204':
+          description: Product deleted successfully
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /products/{id}/reviews:
+    post:
+      summary: Add review to product
+      tags: [Products]
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+          example: "68ccf7753d87cf1b3c37fefc"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [user, rate]
+              properties:
+                user:
+                  type: string
+                  example: "68caf6c7f0a53d358827aacc"
+                rate:
+                  type: number
+                  minimum: 0
+                  maximum: 5
+                  example: 4.5
+                comment:
+                  type: string
+                  example: "Great product!"
+      responses:
+        '201':
+          description: Review added successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Review added successfully"
+                  reviews:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Review'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: Product not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+    get:
+      summary: Get product reviews
+      tags: [Products]
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+          example: "68ccf7753d87cf1b3c37fefc"
+      responses:
+        '200':
+          description: List of product reviews
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Review'
+        '404':
+          description: Product not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  # Cart Routes
+  /cart/add:
+    post:
+      summary: Add items to cart
+      tags: [Cart]
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [items]
+              properties:
+                items:
+                  type: array
+                  items:
+                    type: object
+                    required: [productId, quantity]
+                    properties:
+                      productId:
+                        type: string
+                        example: "68ccf7753d87cf1b3c37fefc"
+                      quantity:
+                        type: number
+                        example: 2
+                      size:
+                        type: string
+                        example: "Medium"
+                      price:
+                        type: number
+                        example: 29.99
+                      color:
+                        type: string
+                        example: "Blue"
+      responses:
+        '200':
+          description: Items added to cart
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Items added to cart"
+                  cart:
+                    $ref: '#/components/schemas/Cart'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: Product not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /cart/{userId}:
+    get:
+      summary: Get user's cart
+      tags: [Cart]
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: userId
+          required: true
+          schema:
+            type: string
+          example: "68cd78ab3e36257ecae7cd55"
+      responses:
+        '200':
+          description: User's cart
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  cart:
+                    $ref: '#/components/schemas/Cart'
+        '404':
+          description: Cart not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /cart/remove/{userId}/{productId}:
+    delete:
+      summary: Remove item from cart
+      tags: [Cart]
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: userId
+          required: true
+          schema:
+            type: string
+          example: "68cd78ab3e36257ecae7cd55"
+        - in: path
+          name: productId
+          required: true
+          schema:
+            type: string
+          example: "68ccf7753d87cf1b3c37fefc"
+      responses:
+        '200':
+          description: Item removed from cart
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Item removed from cart"
+        '404':
+          description: Cart not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
