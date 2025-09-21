@@ -136,6 +136,20 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/CartItem'
+    Favourit:
+      type: object
+      properties:
+        _id:
+          type: string
+          example: "68cd78ab3e36257ecae7cd55"
+        userId:
+          type: string
+          example: "68cd78ab3e36257ecae7cd55"
+        products:
+          type: array
+          items:
+            type: string
+          example: ["68ccf7753d87cf1b3c37fefc", "68ccf7753d87cf1b3c37fefd"]
     Error:
       type: object
       properties:
@@ -691,6 +705,112 @@ paths:
                     example: "Item removed from cart"
         '404':
           description: Cart not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  # Favourit Routes
+  /favourit/add:
+    post:
+      summary: Add product to favourites
+      tags: [Favourites]
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [productId]
+              properties:
+                productId:
+                  type: string
+                  example: "68ccf7753d87cf1b3c37fefc"
+      responses:
+        '200':
+          description: Product added to favourites
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Product added to favourit"
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /favourit/{userId}:
+    get:
+      summary: Get user's favourites
+      tags: [Favourites]
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: userId
+          required: true
+          schema:
+            type: string
+          example: "68cd78ab3e36257ecae7cd55"
+      responses:
+        '200':
+          description: User's favourites
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Favourit'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /favourit/remove/{userId}/{productId}:
+    delete:
+      summary: Remove product from favourites
+      tags: [Favourites]
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: userId
+          required: true
+          schema:
+            type: string
+          example: "68cd78ab3e36257ecae7cd55"
+        - in: path
+          name: productId
+          required: true
+          schema:
+            type: string
+          example: "68ccf7753d87cf1b3c37fefc"
+      responses:
+        '200':
+          description: Product removed from favourites
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Product removed from favourit"
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: Favourit not found
           content:
             application/json:
               schema:

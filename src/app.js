@@ -9,6 +9,8 @@ const mangoose = require('mongoose');
 mangoose.connect( process.env.MONGO_URI )
 .then( () => console.log('DB Connected') )
 .catch( (err) => console.log('DB Connection Error: ', err) );
+
+
 app.use(cors({
     origin: 'http://localhost:3000'
 })); // السماح لأي دومين بالاتصال
@@ -24,11 +26,13 @@ const userrouter = require("./routes/userRoute");
 const categoryrouter = require("./routes/catogryRoute");
 const productrouter = require("./routes/productRoute");
 const cartrouter = require("./routes/cartRoute");
+const favouritrouter = require("./routes/favouritRoute");
 
 app.use("/products", productrouter);
 app.use("/users", userrouter);
 app.use("/categories", categoryrouter);
 app.use("/cart", cartrouter);
+app.use("/favourit", favouritrouter);
 
 
 

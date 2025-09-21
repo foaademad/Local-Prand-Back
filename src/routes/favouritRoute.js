@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const { addToFavourit, getFavourit, removeFromFavourit } = require('../controllers/favouritController');
+const { addToFavourit, getFavourit, removeFromFavourit } = require('../controllers/favouritContrpller');
 const protectRouter = require('../middleware/protectRouting');
 
 router.post('/add', protectRouter, addToFavourit);
